@@ -111,8 +111,18 @@ export const unfollow = async (user1Slug: string, user2Slug: string) => {
 export const updateUserInfo = async (slug: string, data: Prisma.UserUpdateInput) => {
     const user = await prisma.user.update({
         where: { slug },
-        data
+        data,
+        select: {
+            name: true,
+            bio: true,
+            link: true,
+            avatar: true,
+            cover: true,
+            slug: true,
+        }
     });
+
+    return user;
 }
 
 export const getUserFollowing = async (slug: string) => {
@@ -132,9 +142,12 @@ export const getUserFollowing = async (slug: string) => {
 }
 
 export const getUserSuggestions = async (slug: string) => {
+    console.log("slug recebido:", slug);
     const following = await getUserFollowing(slug);
+    console.log("following:", following);
 
     const followingPlusMe = [...following, slug];
+    console.log("followingPlusMe:", followingPlusMe);
 
     type Suggestion = Pick<
         Prisma.UserGetPayload<Prisma.UserDefaultArgs>, 
@@ -142,15 +155,17 @@ export const getUserSuggestions = async (slug: string) => {
     >;
 
 
-    const suggestions: Suggestion[] = await prisma.$queryRaw`
+    const slugs = followingPlusMe.map(s => `'${s}'`).join(", ");
+
+    const suggestions: Suggestion[] = await prisma.$queryRawUnsafe(`
         SELECT
             name, avatar, slug
         FROM "User"
         WHERE 
-            slug NOT IN (${followingPlusMe.join(", ")})  
+            slug NOT IN (${slugs})
         ORDER BY RANDOM()
         LIMIT 2;
-    `;
+    `);
 
     for(let sugIndex in suggestions) {
         suggestions[sugIndex].avatar = getPublicURL(suggestions[sugIndex].avatar);

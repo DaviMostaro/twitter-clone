@@ -5,6 +5,9 @@ import { checkIfTweetIsLikedByUser, createTweet, findAnswsersFromTweet, findTwee
 import { addHashtag } from "../services/trend";
 
 export const addTweet = async (req: ExtendedRequest, res: Response): Promise<any> => {
+    
+    console.log("BODY:", req.body, "FILE:", req.file);
+
     const safeData = addTweetSchema.safeParse(req.body);
     if(!safeData.success) {
         res.json({ errors: safeData.error.errors.map(error => error.message) });
@@ -18,10 +21,16 @@ export const addTweet = async (req: ExtendedRequest, res: Response): Promise<any
         }
     }
 
+    let imagePath = "";
+    if (req.file) {
+        imagePath = req.file.filename; 
+    }
+
     const newTweet = await createTweet(
         req.userSlug as string,
         safeData.data.body,
-        safeData.data.answer ? parseInt(safeData.data.answer) : 0
+        safeData.data.answer ? parseInt(safeData.data.answer) : 0,
+        imagePath
     );
 
     const hashtags = safeData.data.body.match(/#[a-zA-Z0-9_]+/g);

@@ -20,7 +20,7 @@ model User {
   password String
   name     String
   avatar   String  @default("default.jpg")
-  cover    String  @default("default.jpg")
+  cover    String  @default("defaultCover.jpg")
   bio      String?
   link     String?
 

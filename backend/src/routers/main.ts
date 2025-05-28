@@ -19,7 +19,7 @@ mainRouter.get("/privateping", verifyJWT, pingController.privatePing);
 mainRouter.post('/auth/signup', authController.signup);
 mainRouter.post('/auth/signin', authController.signin);
 
-mainRouter.post('/tweet', verifyJWT, tweetController.addTweet);
+mainRouter.post('/tweet', verifyJWT, upload.single("image"), tweetController.addTweet);
 mainRouter.get('/tweet/:id', verifyJWT, tweetController.getTweet);
 mainRouter.get('/tweet/:id/answers', verifyJWT, tweetController.getAnswers);
 mainRouter.post('/tweet/:id/like', verifyJWT, tweetController.likeToggle);
@@ -27,6 +27,7 @@ mainRouter.post('/tweet/:id/like', verifyJWT, tweetController.likeToggle);
 mainRouter.get('/user/:slug', verifyJWT, userController.getUser);
 mainRouter.get('/user/:slug/tweets', verifyJWT, userController.getUserTweets);
 mainRouter.post('/user/:slug/follow', verifyJWT, userController.followToggle);
+mainRouter.get('/user/:slug/following', verifyJWT, userController.getUserFollowingController);
 mainRouter.put('/user', verifyJWT, userController.updateUser);
 mainRouter.put('/user/avatar', verifyJWT, upload.single("avatar"), userController.updateAvatar);
 mainRouter.put('/user/cover', verifyJWT, upload.single("cover"), userController.updateCover);

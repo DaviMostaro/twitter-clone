@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { ExtendedRequest } from "../types/extended-request";
 import { getPublicURL } from "../utils/url";
-import { checkIfFollows, findUserBySlug, follow, getUserFollowersCount, getUserFollowingCount, getUserTweetCount, unfollow, updateAvatarInfo, updateCoverInfo, updateUserInfo } from "../services/user";
+import { checkIfFollows, findUserBySlug, follow, getUserFollowersCount, getUserFollowing, getUserFollowingCount, getUserTweetCount, unfollow, updateAvatarInfo, updateCoverInfo, updateUserInfo } from "../services/user";
 import { prisma } from "../utils/prisma";
 import { userTweetsSchema } from "../schemas/user-tweets";
 import { findTweetsByUser } from "../services/tweet";
@@ -57,19 +57,33 @@ export const followToggle = async (req: ExtendedRequest, res: Response): Promise
     }
 }
 
+export const getUserFollowingController = async (req: ExtendedRequest, res: Response): Promise<any> => {
+    const { slug } = req.params;
+    const following = [];
+    const response = await getUserFollowing(slug);
+
+    for(const user of response) {
+        following.push({
+            slug: user
+        })
+    }
+
+    res.json({ following });
+}
+
 export const updateUser = async (req: ExtendedRequest, res: Response): Promise<any> => {
     const safeData = updateUserSchema.safeParse(req.body);
     if(!safeData.success) {
-        res.json({ errors: safeData.error.errors.map(error => error.message) });
+        res.status(400).json({ errors: safeData.error.errors.map(error => error.message) });
         return;
     }
 
-    await updateUserInfo(
+    const user = await updateUserInfo(
         req.userSlug as string,
         safeData.data
     );
 
-    res.json({});
+    res.json({user});
 }
 
 export const updateAvatar = async (req: ExtendedRequest, res: Response): Promise<any> => {
@@ -85,13 +99,16 @@ export const updateAvatar = async (req: ExtendedRequest, res: Response): Promise
 }
 
 export const updateCover = async (req: ExtendedRequest, res: Response): Promise<any> => {
-    const cover = req.file?.filename;
-    if(!cover) {
-        return res.status(400).json({ error: "Imagem não encontrada" });
+    let cover = req.file?.filename;
+
+    if (!cover) {
+        cover = "";
     }
 
     await updateCoverInfo(
         req.userSlug as string,
         cover
     );
+
+    return res.status(200).json({ success: true });
 }
