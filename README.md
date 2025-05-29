@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/DaviMostaro/gif-assets/main/twitter.gif" width="800">
+
 # <Clone do Twitter/X>
 Projeto cloanando algumas partes da UI e das funcionalidades do X. Feito para fins didáticos.
 
